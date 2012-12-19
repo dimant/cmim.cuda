@@ -1,0 +1,10 @@
+Package: cmim.cuda
+Title: Conditional Mutual Information Maximisation
+Version: 1.1
+Date: 2012-06-12
+Author: Diman Todorov
+Maintainer: Diman Todorov <todorovd@cardiff.ac.uk>
+Description: Conditional Mutual Information Maximisation with CUDA acceleration
+License: MIT
+Depends: ape, cluster
+SystemRequirements: CUDA 4.0; NVidia Developer Driver 4.0; Visual Studio Express 2010 (for win32); gcc 4.4 (for linux)

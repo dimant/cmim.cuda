@@ -1,0 +1,2 @@
+useDynLib(libbfscuda)
+export(cmim, cmim.default, cmim.formula, mRRmatrix, mRRspan, print.cmim, summary.cmim, plot.cmim)

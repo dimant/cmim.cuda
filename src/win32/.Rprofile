@@ -1,0 +1,6 @@
+library(utils)
+library(stats)
+library(cmim.cuda)
+data(SPECT)
+source("../../R/cmim.R")
+result <- MIFSU2(SPECT[,1:21], SPECT[,22])

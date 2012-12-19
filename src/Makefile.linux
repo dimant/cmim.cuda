@@ -1,0 +1,21 @@
+SHARED_LIB = 1
+
+BINDIR = ./bin
+LIBDIR = ./lib
+EXECUTABLE := libbfscuda.so
+
+CCFILES := bfscuda.cpp data_loader.cpp evaluate_term.cpp r_binding.cpp utils.cpp cuda_utils.cpp
+CUFILES_sm_12 := bfscuda_device.cu bfscuda_infrastructure.cu bfscuda_kernels.cu 
+
+# an ugly part - setting rootdir for CUDA SDK makefile
+# look for common.mk - I don't know where SDK installs it on Linux -
+# and change ROOTDIR accordingly 
+ROOTDIR := ~/NVIDIA_GPU_Computing_SDK/C/common
+
+GCCVERSION := $(shell bash compiler-version.sh)
+
+SHARED_LIB = 1
+
+DEBUG = 1
+
+include ./common.mk

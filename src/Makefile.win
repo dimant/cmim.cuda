@@ -1,0 +1,22 @@
+ERROR := "OK"
+
+ifeq (${CUDA_PATH_V4_1},)
+     ERROR := $(warning Could not find CUDA v4.1)
+     @exit
+endif
+
+ifneq ($(shell win32/checkVCE2010.bat),)
+     ERROR := $(warning Could not find Visual C++ Express 2010.)
+     @exit
+endif
+
+libbfscuda.dll:
+		win32/buildvc.bat win32/win32.sln
+		cp win32/Release/libbfscuda.dll .
+
+clean: check
+	-rm libbfscuda.dll
+	-rm -rf win32/x64
+	-rm -rf win32/ipch
+	-rm win32/Release
+	-rm win32/Debug
