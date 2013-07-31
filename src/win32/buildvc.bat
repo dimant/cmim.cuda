@@ -1,7 +1,7 @@
 @echo off
 rem setlocal
 
-call win32/setenv.bat
+call win32\setenv.bat
 
 start /wait "vc" VCExpress.exe %1 /build "Release"
 

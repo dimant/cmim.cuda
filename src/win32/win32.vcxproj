@@ -52,7 +52,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.0.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.1.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -81,6 +81,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>libbfscuda</TargetName>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -100,7 +102,7 @@
       <AdditionalDependencies>cudart.lib;cuda.lib</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
-      <Command>cp D:\Dropbox\Diss\src\R\cmim.cuda\src\win32\Release\libbfscuda.dll C:\Users\diman\Documents\R\win-library\2.13\cmim.cuda\libs\i386\libbfscuda.dll</Command>
+      <Command>cp $(TargetPath)  D:\Program Files\R\R-2.15.2\library\cmim.cuda\libs\i386\libbfscuda.dll</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>copying dll to R library</Message>
@@ -109,7 +111,7 @@
       <CodeGeneration>compute_20,sm_20</CodeGeneration>
     </CudaCompile>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) "D:\Program Files\R\R-2.15.0\library\cmim.cuda\libs\i386\"</Command>
+      <Command>copy $(TargetPath) "c:\Program Files\R\R-3.0.1\library\cmim.cuda\libs\i386\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -144,6 +146,12 @@
     <PostBuildEvent>
       <Command>copy $(TargetPath) $(SolutionDir)..\</Command>
     </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -167,11 +175,6 @@
     <ClCompile Include="..\cuda_utils.cpp" />
     <ClCompile Include="..\data_loader.cpp" />
     <ClCompile Include="..\evaluate_term.cpp" />
-    <ClCompile Include="..\jni_binding.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\mrmr.cpp" />
     <ClCompile Include="..\mrmr_data.cpp" />
     <ClCompile Include="..\nrutil.cpp" />
@@ -195,11 +198,6 @@
     <ClInclude Include="..\r_binding.h" />
     <ClInclude Include="..\sort2.h" />
     <ClInclude Include="..\utils.h" />
-    <ClInclude Include="..\weka_attributeSelection_CMIMAttributeEvaluator.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\bfscuda_device.cu">
@@ -230,6 +228,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.0.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.1.targets" />
   </ImportGroup>
 </Project>

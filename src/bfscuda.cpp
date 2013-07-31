@@ -75,6 +75,7 @@ int parallel_process(Data &d, int k, int* vars, std::vector<struct result_record
 
 				i_u_yx = h_u_x - h_u_yx;
 
+#ifdef _DEBUG
 				if(i_u_yx == std::numeric_limits<double>::infinity() || i_u_yx < 0.0) {
 					output << "Ooops " << iter << ": " << h_u_x << " - " << h_u_yx << " | ";
 					for(j=0; j < vars_queue[i][0] * 2 + 1; j++) {
@@ -88,7 +89,7 @@ int parallel_process(Data &d, int k, int* vars, std::vector<struct result_record
 
 					l.info(output.str());
 				}
-				
+#endif	
 				rr = (struct result_record*) malloc(sizeof(struct result_record));
 				rr->i_u_yx = i_u_yx;				
 				for(j = 0; j < vars_queue[i][0] * 2 + 1; j++) {

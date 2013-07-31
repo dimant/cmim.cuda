@@ -96,61 +96,134 @@ cmim.formula <- function(formula, data, k=2, max.parallelism=0, na.rm=TRUE, ...)
     result
 }
 
-mRRmatrix <- function(x, y, max.parallelism=0, na.rm=TRUE, ...) {
+mifs <- function(x, y) {
+  d <- cbind(x, y)
+  
+  weights <- as.matrix(sapply(1:ncol(x), function(v) {
+    mi.empirical(table(d[c(v, ncol(d))]))
+  }))
+  rownames(weights) <- colnames(d[1:length(d) - 1])
+
+  weights
+}
+
+mifsuk <- function(x, y, k=1, max.parallelism=0, na.rm=FALSE, ...) {
+  d <- prepareData(x, y, na.rm)
+  terms <- mifs(x,y)
+
+  for(i in 1:k) {
     result <- list()
-
-    d <- prepareData(x, y, na.rm)
-
-    result <- .C("r_mRRmatrix",
+    result <- .C("r_mifsuk",
                  data=as.character(d$data),
                  n=as.integer(d$n),
                  p=as.integer(d$p),
+                 k=as.integer(i),
                  max.parallelism=as.integer(max.parallelism),
-                 weights=double((d$p-1)^2),
+                 weights=double(d$p-1),
                  PACKAGE="libbfscuda")
+    
+    terms <- cbind(terms, result$weights)
+  }
 
-    class(result) <- "mRR"
-    result$call <- match.call()
-    result$weights <- matrix(result$weights, ncol=d$p-1)
-    result
+  terms
 }
 
-mRRspan <- function(x, y, max.parallelism=0, na.rm=TRUE, ...) {
-  result <- list()
-
-  result <- mRRmatrix(x, y, max.parallelism, na.rm)
-  myspantree <- mst(result$weights) * result$weights
-
-  result$call <- match.call()
-  result$weights <- apply(myspantree, 2, min)
-  result$indices <- rev(order(order(result$weights)))
+cmifsExact <- function(x, y, k=1, max.parallelism=0, na.rm=FALSE, ...) {
+  infgain <- mifs(x, y)
+  d <- prepareData(x, y, na.rm)
+  
+  result <- .C("r_cmifs_exact",
+               data=as.character(d$data),
+               n=as.integer(d$n),
+               p=as.integer(d$p),
+               k=as.integer(2),
+               max.parallelism=as.integer(max.parallelism),
+               infgain=infgain,
+               weights=double(d$p-1),
+               indices=double(d$p-1),
+               PACKAGE="libbfscuda")
 
   result
 }
 
-mRRshortpaths <- function(x, y, max.parallelism=0, na.rm=TRUE) {
-  result <- mRRmatrix(x, y, max.parallelism, na.rm)
-  paths <- allShortestPaths(result$weights)
+mifsmed <- function(x, y, k=1, max.parallelism=0, na.rm=FALSE, ...) {
+  result <- list()
+  
+  d <- prepareData(x, y, na.rm)
+  terms <- mifs(x, y)
 
-  # add up the weights along a path recursively
-  f <- function(x, l) {
-    if(length(x) > 1) {
-      f(x[2:length(x)], l + result$weights[x[1],x[2]])
-    } else {
-      l
-    }
+  for(i in 1:k) {
+    result <- .C("r_mifsmed",
+                 data=as.character(d$data),
+                 n=as.integer(d$n),
+                 p=as.integer(d$p),
+                 k=as.integer(i),
+                 max.parallelism=as.integer(max.parallelism),
+                 weights=double(d$p-1),
+                 PACKAGE="libbfscuda")
+    terms <- cbind(terms, result$weights)
   }
   
-  pathlengths <- apply(expand.grid(1:ncol(x), 1:ncol(x)), 1, function(x) {
-    f(extractPath(paths, x[1], x[2]), 0)
-  } )
+  terms
+}
 
-  weights <- apply(matrix(pathlengths, ncol=ncol(x)), 2, sum)
+mRRmatrix <- function(x, y, max.parallelism=0, na.rm=TRUE, diag=FALSE, upper=FALSE) {
+  result <- list()
 
-  result$weights <- weights
-  result$indices <- rev(order(order(weights)))
+  d <- prepareData(x, y, na.rm)
+
+  result <- .C("r_mRRmatrix",
+               data=as.character(d$data),
+               n=as.integer(d$n),
+               p=as.integer(d$p),
+               max.parallelism=as.integer(max.parallelism),
+               weights=double((d$p-1)^2),
+               PACKAGE="libbfscuda")
+
+#  result <- as.dist(matrix(result$weights, ncol=d$p-1, nrow=d$p-1))
+#  attr(result, "call") <- match.call()
+
+  result <- matrix(result$weights, ncol=d$p-1, nrow=d$p-1)
+  
   result
 }
+
+#mRRspan <- function(x, y, max.parallelism=0, na.rm=TRUE, ...) {
+#  result <- list()
+# 
+#  result <- mRRmatrix(x, y, max.parallelism, na.rm)
+#  myspantree <- mst(result$weights) * result$weights
+# 
+#  result$call <- match.call()
+#  result$weights <- apply(myspantree, 2, min)
+#  result$indices <- rev(order(order(result$weights)))
+# 
+#  result
+#}
+# 
+#mRRshortpaths <- function(x, y, max.parallelism=0, na.rm=TRUE) {
+#  result <- mRRmatrix(x, y, max.parallelism, na.rm)
+#  paths <- allShortestPaths(result$weights)
+# 
+#  # add up the weights along a path recursively
+#  f <- function(x, l) {
+#    if(length(x) > 1) {
+#      f(x[2:length(x)], l + result$weights[x[1],x[2]])
+#    } else {
+#      l
+#    }
+#  }
+#  
+#  pathlengths <- apply(expand.grid(1:ncol(x), 1:ncol(x)), 1, function(x) {
+#    f(extractPath(paths, x[1], x[2]), 0)
+#  } )
+# 
+#  weights <- apply(matrix(pathlengths, ncol=ncol(x)), 2, sum)
+# 
+#  result$weights <- weights
+#  result$indices <- rev(order(order(weights)))
+#  result
+#}
 
 predict.cmim <- function(object, newDataNULL, ...) {
 
